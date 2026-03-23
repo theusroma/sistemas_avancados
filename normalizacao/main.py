@@ -33,7 +33,7 @@ class NormalizadorDados:
             print(f"Erro: A coluna '{coluna}' não possui histórico de MinMax.")
         return df_copy
 
-    # 2. Label Encoding (Dados Ordinais)
+    # Label Encoding (Dados Ordinais)
     def label_encode(self, df, coluna):
         df_copy = df.copy()
         encoder = LabelEncoder()
@@ -54,7 +54,7 @@ class NormalizadorDados:
             print(f"Erro: A coluna '{coluna}' não possui histórico de Label Encoding.")
         return df_copy
 
-    # 3. One Hot Encoding (Dados Nominais)
+    # One Hot Encoding (Dados Nominais)
     def one_hot_encode(self, df, coluna):
         df_copy = df.copy()
         
@@ -84,3 +84,43 @@ class NormalizadorDados:
         else:
             print(f"Erro: A coluna '{coluna}' não possui histórico de One Hot Encoding.")
         return df_copy
+    
+
+
+# Carrega o arquivo avisando que o separador é ';' e o decimal é ','
+df_aula = pd.read_csv('dados_normalizar.csv', sep=';', decimal=',')
+
+print("DADOS ORIGINAIS")
+print(df_aula.head())
+print("-" * 40)
+
+# Instancia a sua classe
+normalizador = NormalizadorDados()
+
+# Aplicando as transformações usando os nomes reais das colunas
+# MinMax para variáveis contínuas numéricas
+df_processado = normalizador.minmax_scale(df_aula, 'idade')
+df_processado = normalizador.minmax_scale(df_processado, 'Peso')
+df_processado = normalizador.minmax_scale(df_processado, 'altura')
+
+#label encode no genero(sexo)
+df_processado_label = normalizador.label_encode(df_processado.copy(), 'sexo')
+print("\n TESTE DO LABEL ENCODER NO SEXO")
+print(df_processado_label.head())
+
+# Para a tabela principal, aplicamos o One Hot Encode no 'sexo', que é o mais correto para nominais:
+df_processado = normalizador.one_hot_encode(df_processado, 'sexo')
+
+print("\nDADOS TOTALMENTE NORMALIZADOS")
+print(df_processado.head())
+print("-" * 40)
+
+# 4. Revertendo as transformações (Desfazendo de trás pra frente)
+df_revertido = normalizador.inverse_one_hot_encode(df_processado, 'sexo')
+df_revertido = normalizador.inverse_minmax_scale(df_revertido, 'altura')
+df_revertido = normalizador.inverse_minmax_scale(df_revertido, 'Peso')
+df_revertido = normalizador.inverse_minmax_scale(df_revertido, 'idade')
+
+print("\nDADOS REVERTIDOS")
+print(df_revertido.head())
+print("-" * 40)
